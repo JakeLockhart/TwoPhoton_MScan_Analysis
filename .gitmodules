@@ -1,0 +1,3 @@
+[submodule "General_Functions"]
+	path = General_Functions
+	url = https://github.com/JakeLockhart/General_Functions
