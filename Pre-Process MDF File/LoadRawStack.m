@@ -20,7 +20,7 @@ function RawStack = LoadRawStack(obj)
     end
     
     RawStack = cat(3, RawStack{:});
-    fprintf('Raw stack created (%.3fs)\n', toc(StackClock));
+    fprintf('Raw stack created (%.3fs) ✓\n', toc(StackClock));
 
     function RawBatchStack = LoadBatchStack(MCS, MetaData, BatchIndex)
         Demo = class(MCS.ReadFrame(MetaData.ImagingChannel.ActiveImagingChannel, BatchIndex(1)));
