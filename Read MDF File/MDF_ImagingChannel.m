@@ -11,7 +11,7 @@ function MetaData = MDF_ImagingChannel(MCS, MetaData)
         MetaData.ImagingChannel.ActiveImagingChannel = find(MetaData.ImagingChannel.Channels(:,1) ~="");
     else
         fprintf('Multiple imaging channels detected, choose active channel.')
-        %MetaData.ImagingChannel.ActiveImagingChannel = listdlg("PromptString", "Choose active channel...", "SelectionMode", "single", "ListString", MetaData.ImagingChannel.Channels);
+        MetaData.ImagingChannel.ActiveImagingChannel = listdlg("PromptString", "Choose active channel...", "SelectionMode", "single", "ListString", MetaData.ImagingChannel.Channels(:,1));
     end
     fprintf('MDF file imaging channels collected ✓\n')
 end
