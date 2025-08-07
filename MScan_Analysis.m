@@ -1,7 +1,7 @@
 classdef MScan_Analysis
     properties
         File struct = struct()
-        Stack
+        Stack struct = struct()
     end
 
     %% Constructor
@@ -14,7 +14,8 @@ classdef MScan_Analysis
     %% Callable Functions
     methods (Access = public)
         function Stack = Pre_Process_MDF_File(obj)
-            Stack = LoadRawStack(obj);
+            Stack.Raw = LoadRawStack(obj);
+            Stack.Raw = RemovePadding(Stack.Raw);
         end
     end
 
