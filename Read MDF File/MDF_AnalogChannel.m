@@ -1,4 +1,29 @@
 function [MetaData, AnalogData] = MDF_AnalogChannel(MCS, MetaData)
+    % <Documentation>
+        % MDF_AnalogChannel()
+        %   Extract metadata from .MDF file using the MCS interface.
+        %   Created by: jsl5865
+        %   
+        % Syntax:
+        %   [MetaData, AnalogData] = MDF_AnalogChannel(MCS, MetaData)
+        %
+        % Description:
+        %   This function reads the analog acquisition information and data
+        %       from a .MDF file through the MCS interface actxserver().
+        %   These recording parameters are saved under a structure 'MetaData.AnalogData'
+        %       and the actual data is saved under AnalogData.
+        %
+        % Input:
+        %   obj - Object containing:
+        %           obj.File.MCS      : actxserver() necessary to read .MDF file frames.
+        %           obj.File.MetaData : File metadata necessary to preallocate array dimensions.
+        %
+        % Output:
+        %   MetaData    - Struct containing metadata fields grouped under `MetaData.AnalogData`
+        %   AnalogData  - Struct containing values from each active analog input channel
+        %
+    % <End Documentation>
+
     fprintf('Collecting MDF analog channels...  \n')
     switch MetaData.Notes.ScanMode
         case "XY Movie"

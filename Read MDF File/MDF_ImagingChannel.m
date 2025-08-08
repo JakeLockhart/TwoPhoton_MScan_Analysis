@@ -1,4 +1,28 @@
 function MetaData = MDF_ImagingChannel(MCS, MetaData)
+    % <Documentation>
+        % MDF_ImagingChannel()
+        %   Extract imaging channel information from .MDF file using the MCS interface.
+        %   Created by: jsl5865
+        %   
+        % Syntax:
+        %   MetaData = MDF_ImagingChannel(MCS, MetaData)
+        %
+        % Description:
+        %   This function collects all the channels from the .MDF file (Green channel, 
+        %       Red channel, etc). It counts the total imaging channels that were 
+        %       recorded during an image session and prompts the user to select an 
+        %       imaging channel as the active imaging channel.
+        %
+        % Input:
+        %   obj - Object containing:
+        %           obj.File.MCS      : actxserver() necessary to read .MDF file frames.
+        %           obj.File.MetaData : File metadata necessary to preallocate array dimensions.
+        %
+        % Output:
+        %   MetaData - Struct containing metadata fields grouped under `MetaData.ImagingChannel`
+        %
+    % <End Documentation>
+
     fprintf('Collecting MDF imaging channels...  ')
     IC_Name = strings(1,4); IC_InputRange = strings(1,4);
     for i = 1:4

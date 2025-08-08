@@ -1,4 +1,26 @@
 function MetaData = MDF_MetaData(MCS)
+    % <Documentation>
+        % MDF_MetaData()
+        %   Extract metadata from .MDF file using the MCS interface.
+        %   Created by: jsl5865
+        %   
+        % Syntax:
+        %   MetaData = MDF_MetaData(MCS)
+        %
+        % Description:
+        %   This function reads the metadata from a .MDF file through the MCS interface
+        %       actxserver().
+        %   These values are saved under a structure 'MetaData.Notes'.
+        %
+        % Input:
+        %   obj - Object containing:
+        %           obj.File.MCS    : actxserver() necessary to read .MDF file frames.
+        %
+        % Output:
+        %   MetaData - Struct containing metadata fields grouped under `MetaData.Notes`
+        %
+    % <End Documentation>
+
     fprintf('Collecting MDF file MetaData...  ')
     MetaData.Notes.Creator                  = MCS.ReadParameter('Created By');
     MetaData.Notes.DateCreated              = MCS.ReadParameter('Created on');
