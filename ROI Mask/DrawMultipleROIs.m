@@ -5,6 +5,7 @@ function ROI = DrawMultipleROIs(ax, ROI_Shape, SaveFigure)
         SaveFigure char = ''
     end
     fprintf('Draw %s ROIs one by one. Double-click region or press enter to confrim and draw another ROI.\nPress Esc to finish...  \n', ROI_Shape)
+    fprintf('%s\n%s\n',ROI_Shape, SaveFigure)    
 
     ROI = {};
     Index = 0;
@@ -31,7 +32,7 @@ function ROI = DrawMultipleROIs(ax, ROI_Shape, SaveFigure)
 
     if isvalid(Image) && ~isempty(ROI)
         TotalROIs = length(ROI);
-        ColorMap = colorcube(TotalROIs);
+        ColorMap = jet(TotalROIs);
 
         for i = 1:TotalROIs
             try
