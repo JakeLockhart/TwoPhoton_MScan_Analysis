@@ -1,4 +1,4 @@
-function ax = MeanProjectionForROIs(Stack)
+function ax = MeanProjection(Stack)
     % Show mean projection of image stack and return axes handle
     figure('Name', 'Draw ROI(s)')
     imagesc(mean(Stack, 3));
