@@ -21,6 +21,7 @@ function ax = MeanProjection(Stack)
         %   ax - Returns the handles for the figure's axis object
         %
     % <End Documentation>
+    
     figure('Name', 'Draw ROI(s)')
     imagesc(mean(Stack, 3));
 
