@@ -28,8 +28,8 @@ function ROIs = TileStack_DrawROI(Stack)
         %   Stack - A cell array representing an image stack, with dimensions Rows x Columns x Frames. 
         %
         % Output:
-        %   ROIs  - Cell array of length equal to the number of image stack. Each cell contains a cell array
-        %           of ROI structures drawn on the corresponding image stack (Shape, Position, Radius (if applicable))
+        %   ROIs  - Cell array of ROI masks for each tile. A binary masks is a 2D logical array where everything
+        %           within the ROI is true (1) and everything outside of the ROI is false (0)
     % <End Documentation>
 
     %% Initialization
