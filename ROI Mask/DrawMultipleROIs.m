@@ -19,7 +19,7 @@ function ROI = DrawMultipleROIs(ax, ROI_Shape, SaveFigure)
             TempROI = DrawROI(ax, ROI_Shape);
             if isvalid(TempROI) && ~isempty(TempROI.Position)
                 TempROI.Label = sprintf('ROI %d', Index);
-                ROI{end+1} = TempROI;
+                ROI{end+1} = createMask(TempROI);
             else
                 delete(TempROI)
                 break;

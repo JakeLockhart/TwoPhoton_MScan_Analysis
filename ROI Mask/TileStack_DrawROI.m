@@ -109,16 +109,10 @@ function ROIs = TileStack_DrawROI(Stack)
 
             ROI_ChosenShape = DropDown.Value;
             ROI_Object = DrawROI(SelectedAx, ROI_ChosenShape);
-
-            ROI_Data.Shape = ROI_ChosenShape;
-            ROI_Data.Position = ROI_Object.Position;
-            if isprop(ROI_Object, 'Radius')
-                ROI_Data.Radius = ROI_Object.Radius;
-            end
             if isempty(ROIs{Index})
-                ROIs{Index} = {ROI_Data};
+                ROIs{Index} = {createMask(ROI_Object)};
             else
-                ROIs{Index}{end+1} = ROI_Data;
+                ROIs{Index}{end+1} = createMask(ROI_Object);
             end
         end
 
