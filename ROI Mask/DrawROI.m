@@ -4,8 +4,6 @@ function ROI = DrawROI(ax, ROI_Shape)
         ROI_Shape char {mustBeMember(ROI_Shape, {'Rectangle', 'Circle', 'Line', 'Polygon', 'Freehand'})} = 'Rectangle'
     end
 
-    title(ax, sprintf('Draw a ROI\n(%s)', ROI_Shape));
-
     switch ROI_Shape
         case 'Rectangle'
             ROI = drawrectangle(ax);
