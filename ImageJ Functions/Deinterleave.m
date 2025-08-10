@@ -37,4 +37,5 @@ function DeinterleavedStack = Deinterleave(Stack, Channels)
     for i = 1:Channels
         DeinterleavedStack.(sprintf('Channel_%d', i)) = Stack(:,:,i:Channels:end);
     end
+    fprintf('Finished deinterleaving file ✓\n')
 end

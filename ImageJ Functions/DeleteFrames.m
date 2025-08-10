@@ -39,6 +39,6 @@ function Stack = DeleteFrames(Stack, FrameIndexToDelete)
         KeptFrames(FrameIndexToDelete) = false;
 
         Stack = Stack(:,:,KeptFrames);
-        fprintf('Frames deleted. New frame count: %d\n', size(Stack, 3))
+        fprintf('Frames deleted ✓. New frame count: %d\n', size(Stack, 3))
     end
 end
