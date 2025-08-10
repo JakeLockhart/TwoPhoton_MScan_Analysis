@@ -14,7 +14,7 @@ function ROIs = TileStack_DrawROI(Stack)
         %   To use this function, choose an ROI shape from the dropdown menu, and click on one of the tiles
         %       containing an image stack. Once both are selected click 'Draw ROI' to create the ROI on that
         %       image. An error will appear if a tile was not selected. Once finished drawing ROIs, click the
-        %       'Done' button to save the ROI object information.
+        %       'Done' button to save the ROI masks.
         %   Note that the input to this function requires image stacks to be contained within a single cell.
         %       This function can be used for a single image stack or multiple image stacks. If stacks are
         %       contained within a structure, use struct2cell(ImageStacks) as an input. If only a single
