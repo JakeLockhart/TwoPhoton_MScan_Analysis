@@ -16,6 +16,48 @@ classdef MScan_Analysis
         function Stack = Pre_Process_MDF_File(obj)
             Stack.Raw = LoadRawStack(obj);
             Stack.Raw = RemovePadding(Stack.Raw);
+            Stack.Raw = uint16(max(Stack.Raw,0));
+        end
+
+        function [ROIs, obj] = MultiChannelDemo(obj)
+            sliceViewer(obj.Stack.Raw)
+            a = input('First frame to delete = ');
+            b = input('Last frame to delete = ');
+            c = input('Total channels = ');
+
+            obj.Stack.Fixed = DeleteFrames(obj.Stack.Raw, [1:a, b:length(obj.Stack.Raw)]);
+            obj.Stack.Deinterleaved = Deinterleave(obj.Stack.Fixed, c);
+
+            ROIs = TileStack_DrawROI(struct2cell(obj.Stack.Deinterleaved));
+
+            figure;
+            tiledlayout("flow");
+            Channels = fieldnames(obj.Stack.Deinterleaved);
+            for i = 1:length(ROIs)
+                obj.Stack.(sprintf('Cropped_CH%d', i)) = CropStackToMask(obj.Stack.Deinterleaved.(Channels{i}), ROIs{length(ROIs)}{1});
+                nexttile
+                imshow(mean(obj.Stack.(sprintf('Cropped_CH%d', i)), 3), []);
+            end
+
+            numChannels = length(ROIs); % or however many channels you have
+            figure; hold on;
+
+            for i = 1:numChannels
+                stackName = sprintf('Cropped_CH%d', i); % Capital 'C'
+                if isfield(obj.Stack, stackName)
+                    stack = obj.Stack.(stackName);
+                    % Compute mean intensity per frame, omitting NaNs
+                    meanVals = squeeze(mean(mean(stack, 1, 'omitnan'), 2, 'omitnan'));
+                    plot(meanVals, 'DisplayName', stackName);
+                end
+            end
+
+            xlabel('Frame');
+            ylabel('Mean Intensity');
+            legend('show');
+            title('Mean Intensity per Frame for Each Cropped Channel');
+            hold off;
+
         end
     end
 
@@ -26,7 +68,7 @@ classdef MScan_Analysis
             addpath(genpath(ClassPath));
             zap
             
-            File.DirectoryInfo = FileLookup("mdf", "TroubleShoot", "G:\Data - Imaging\ETL and EOM Power Modulation\20250723_PowerModulation_MScanVsArduino\Arduino\250723_ArduinoPower_(0_5_10_15_20).MDF");
+            File.DirectoryInfo = FileLookup("mdf", "SingleFile");
             [File.MCS, File.MetaData, File.AnalogData] = ReadMDF(File.DirectoryInfo);
             
         end
