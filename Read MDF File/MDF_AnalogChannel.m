@@ -25,8 +25,9 @@ function [MetaData, AnalogData] = MDF_AnalogChannel(MCS, MetaData)
     % <End Documentation>
 
     fprintf('Collecting MDF analog channels...  \n')
+    AnalogData = struct();
     switch MetaData.Notes.ScanMode
-        case "XY Movie"
+        case {"XY Movie", "Image Stack"}
             MetaData.AnalogChannel.Frequency = MCS.ReadParameter('Analog Acquisition Frequency (Hz)');
             MetaData.AnalogChannel.SampleCount = str2double(MCS.ReadParameter('Analog Sample Count'));
             MetaData.AnalogChannel.Resolution = MCS.ReadParameter('Analog Resolution');
@@ -47,7 +48,7 @@ function [MetaData, AnalogData] = MDF_AnalogChannel(MCS, MetaData)
             end
             MetaData.AnalogChannel.Channels = [AC_Channel', AC_Name', AC_InputRange'];
         otherwise
-            error("Scan mode not currently supported.")
+            error("Scan mode not currently supported by MDF_AnalogChannel.m")
     end
     fprintf('MDF file analog channels collected ✓\n')
 end
