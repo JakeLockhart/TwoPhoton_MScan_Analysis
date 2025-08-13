@@ -2,11 +2,14 @@ classdef MScan_Analysis
     properties
         File struct = struct()
         Stack struct = struct()
+        ROI
     end
 
     %% Constructor
     methods
         function obj = MScan_Analysis()
+            format short
+            format compact
             obj.File = MScan_Analysis.Load_MDF_File;
         end
     end
@@ -19,45 +22,31 @@ classdef MScan_Analysis
             Stack.Raw = uint16(max(Stack.Raw,0));
         end
 
-        function [ROIs, obj] = MultiChannelDemo(obj)
-            sliceViewer(obj.Stack.Raw)
-            a = input('First frame to delete = ');
-            b = input('Last frame to delete = ');
-            c = input('Total channels = ');
+        function [obj, PixelIntensity] = PixelIntensity_InterleavedStack(obj)
+            fprintf('Deinterleaving image stack...\n')
 
-            obj.Stack.Fixed = DeleteFrames(obj.Stack.Raw, [1:a, b:length(obj.Stack.Raw)]);
-            obj.Stack.Deinterleaved = Deinterleave(obj.Stack.Fixed, c);
+            sliceViewer(obj.Stack.Raw);
+        
+            fprintf('Removing the startup frames: 1-_')
+            FirstDeleteIndex = input('');
+            fprintf('Removing the ending frames: _-end')
+            SecondDeleteIndex = input('');
+            fprintf('How many channels to deinterleave?')
+            Channels = input('');
 
-            ROIs = TileStack_DrawROI(struct2cell(obj.Stack.Deinterleaved));
+            obj.Stack.Fixed = DeleteFrames(obj.Stack.Raw, [1:FirstDeleteIndex, SecondDeleteIndex:length(obj.Stack.Raw)]);
+            obj.Stack.Deinterleaved = Deinterleave(obj.Stack.Fixed, Channels);
 
-            figure;
-            tiledlayout("flow");
-            Channels = fieldnames(obj.Stack.Deinterleaved);
-            for i = 1:length(ROIs)
-                obj.Stack.(sprintf('Cropped_CH%d', i)) = CropStackToMask(obj.Stack.Deinterleaved.(Channels{i}), ROIs{length(ROIs)}{1});
-                nexttile
-                imshow(mean(obj.Stack.(sprintf('Cropped_CH%d', i)), 3), []);
-            end
+            obj.ROI = TileStack_DrawROI(struct2cell(obj.Stack.Deinterleaved));
+            CommonMask = ~cellfun(@isempty, obj.ROI);
+            CommonROI = obj.ROI{CommonMask}{1};
 
-            numChannels = length(ROIs); % or however many channels you have
-            figure; hold on;
+            obj.Stack.CroppedChannel = structfun(@(Stack) CropStackToMask(Stack, CommonROI), ...
+                                                 obj.Stack.Deinterleaved, ...
+                                                 "UniformOutput", false ...
+                                                );
 
-            for i = 1:numChannels
-                stackName = sprintf('Cropped_CH%d', i); % Capital 'C'
-                if isfield(obj.Stack, stackName)
-                    stack = obj.Stack.(stackName);
-                    % Compute mean intensity per frame, omitting NaNs
-                    meanVals = squeeze(mean(mean(stack, 1, 'omitnan'), 2, 'omitnan'));
-                    plot(meanVals, 'DisplayName', stackName);
-                end
-            end
-
-            xlabel('Frame');
-            ylabel('Mean Intensity');
-            legend('show');
-            title('Mean Intensity per Frame for Each Cropped Channel');
-            hold off;
-
+            PixelIntensity = PlotZAxisProfile(obj.Stack.CroppedChannel);
         end
     end
 
