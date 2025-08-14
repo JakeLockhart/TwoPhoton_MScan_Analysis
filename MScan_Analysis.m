@@ -10,21 +10,12 @@ classdef MScan_Analysis
         function obj = MScan_Analysis()
             format short; format compact;
             obj.File = MScan_Analysis.Load_MDF_File;
+            obj.Stack = MScan_Analysis.Pre_Process_MDF_File(obj);
         end
     end
 
     %% Callable Functions
     methods (Access = public)
-        function Stack = Pre_Process_MDF_File(obj)
-            Stack.Raw = LoadRawStack(obj);
-            Stack.Raw = structfun(@(Stack) RemovePadding(Stack), ...
-                                  Stack.Raw, ...
-                                  "UniformOutput", false);
-            Stack.Raw = structfun(@(Stack) uint16(max(Stack, 0)), ...
-                                  Stack.Raw, ...
-                                  "UniformOutput", false);
-        end
-
         function [obj, PixelIntensity] = PixelIntensity_InterleavedStack(obj)
             fprintf('Deinterleaving image stack...\n')
 
@@ -63,6 +54,16 @@ classdef MScan_Analysis
             File.DirectoryInfo = FileLookup("mdf", "SingleFile");
             [File.MCS, File.MetaData, File.AnalogData] = ReadMDF(File.DirectoryInfo);
             
+        end
+
+        function Stack = Pre_Process_MDF_File(obj)
+            Stack.Raw = LoadRawStack(obj);
+            Stack.Raw = structfun(@(Stack) RemovePadding(Stack), ...
+                                  Stack.Raw, ...
+                                  "UniformOutput", false);
+            Stack.Raw = structfun(@(Stack) uint16(max(Stack, 0)), ...
+                                  Stack.Raw, ...
+                                  "UniformOutput", false);
         end
     end
 end
