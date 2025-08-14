@@ -10,8 +10,7 @@ function MetaData = MDF_ImagingChannel(MCS, MetaData)
         % Description:
         %   This function collects all the channels from the .MDF file (Green channel, 
         %       Red channel, etc). It counts the total imaging channels that were 
-        %       recorded during an image session and prompts the user to select an 
-        %       imaging channel as the active imaging channel.
+        %       recorded during an image session and loads all active imaging channels.
         %
         % Input:
         %   obj - Object containing:
@@ -33,11 +32,5 @@ function MetaData = MDF_ImagingChannel(MCS, MetaData)
     MetaData.ImagingChannel.TotalImagingChannels = sum(MetaData.ImagingChannel.Channels(:,1) ~= "");
     MetaData.ImagingChannel.ActiveImagingChannel = find(MetaData.ImagingChannel.Channels(:,1) ~= "")';
 
-    % if MetaData.ImagingChannel.TotalImagingChannels == 1
-    %     MetaData.ImagingChannel.ActiveImagingChannel = find(MetaData.ImagingChannel.Channels(:,1) ~="");
-    % else
-    %     fprintf('Multiple imaging channels detected, choose active channel.')
-    %     MetaData.ImagingChannel.ActiveImagingChannel = listdlg("PromptString", "Choose active channel...", "SelectionMode", "single", "ListString", MetaData.ImagingChannel.Channels(:,1));
-    % end
     fprintf('MDF file imaging channels collected ✓\n')
 end
