@@ -8,8 +8,7 @@ classdef MScan_Analysis
     %% Constructor
     methods
         function obj = MScan_Analysis()
-            format short
-            format compact
+            format short; format compact;
             obj.File = MScan_Analysis.Load_MDF_File;
         end
     end
@@ -18,8 +17,12 @@ classdef MScan_Analysis
     methods (Access = public)
         function Stack = Pre_Process_MDF_File(obj)
             Stack.Raw = LoadRawStack(obj);
-            Stack.Raw = RemovePadding(Stack.Raw);
-            Stack.Raw = uint16(max(Stack.Raw,0));
+            Stack.Raw = structfun(@(Stack) RemovePadding(Stack), ...
+                                  Stack.Raw, ...
+                                  "UniformOutput", false);
+            Stack.Raw = structfun(@(Stack) uint16(max(Stack, 0)), ...
+                                  Stack.Raw, ...
+                                  "UniformOutput", false);
         end
 
         function [obj, PixelIntensity] = PixelIntensity_InterleavedStack(obj)
