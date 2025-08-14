@@ -30,12 +30,14 @@ function MetaData = MDF_ImagingChannel(MCS, MetaData)
         IC_InputRange(i) = string(MCS.ReadParameter(sprintf('Scanning Ch %d Input Range',i-1)));
     end
     MetaData.ImagingChannel.Channels = [IC_Name', IC_InputRange'];
-    MetaData.ImagingChannel.TotalImagingChannels = sum(MetaData.ImagingChannel.Channels(:,1)~="");
-    if MetaData.ImagingChannel.TotalImagingChannels == 1
-        MetaData.ImagingChannel.ActiveImagingChannel = find(MetaData.ImagingChannel.Channels(:,1) ~="");
-    else
-        fprintf('Multiple imaging channels detected, choose active channel.')
-        MetaData.ImagingChannel.ActiveImagingChannel = listdlg("PromptString", "Choose active channel...", "SelectionMode", "single", "ListString", MetaData.ImagingChannel.Channels(:,1));
-    end
+    MetaData.ImagingChannel.TotalImagingChannels = sum(MetaData.ImagingChannel.Channels(:,1) ~= "");
+    MetaData.ImagingChannel.ActiveImagingChannel = find(MetaData.ImagingChannel.Channels(:,1) ~= "")';
+
+    % if MetaData.ImagingChannel.TotalImagingChannels == 1
+    %     MetaData.ImagingChannel.ActiveImagingChannel = find(MetaData.ImagingChannel.Channels(:,1) ~="");
+    % else
+    %     fprintf('Multiple imaging channels detected, choose active channel.')
+    %     MetaData.ImagingChannel.ActiveImagingChannel = listdlg("PromptString", "Choose active channel...", "SelectionMode", "single", "ListString", MetaData.ImagingChannel.Channels(:,1));
+    % end
     fprintf('MDF file imaging channels collected ✓\n')
 end
