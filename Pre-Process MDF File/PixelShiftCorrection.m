@@ -1,4 +1,4 @@
-function PShiftStack = PixelShiftCorrection(Stack, Shift)
+function PShiftStack = PixelShiftCorrection(Stack, Shift, Scope, FrameIndex)
     % <Documentation>
         % PixelShiftCorrection()
         %   Applies a pixel shift correction to an image stack by offsetting alternate rows.
@@ -26,8 +26,15 @@ function PShiftStack = PixelShiftCorrection(Stack, Shift)
         %   
     % <End Documentation>
 
+    arguments
+        Stack
+        Shift
+        Scope {mustBeMember(Scope, {'SingleFrame', 'WholeStack'})} = 'WholeStack'
+        FrameIndex (1,1) {mustBePositive, mustBeInteger} = 1
+    end
+
     PShiftStack = Stack;
-    [Rows, ~, ~] = size(Stack);
+    [Rows, ~, Frames] = size(Stack);
     if Shift == 0
         return
     end
@@ -39,7 +46,20 @@ function PShiftStack = PixelShiftCorrection(Stack, Shift)
     end
 
     Shift = abs(Shift);    
-    PShiftStack(ShiftingRows, 1+Shift:end, :) = Stack(ShiftingRows, 1:end-Shift, :);
-    PShiftStack = PShiftStack(:, 1:end-Shift, :);
+
+    switch Scope
+        case 'WholeStack'
+            PShiftStack(ShiftingRows, 1+Shift:end, :) = Stack(ShiftingRows, 1:end-Shift, :);
+            PShiftStack = PShiftStack(:, 1:end-Shift, :);
+
+        case 'SingleFrame'
+            if FrameIndex > Frames
+                error('Frame index exceeds total frames in image stack')
+            end
+
+            PShiftStack(ShiftingRows, 1+Shift:end, FrameIndex) = Stack(ShiftingRows, 1:end-Shift, FrameIndex);
+            PShiftStack(:, 1:end-Shift, FrameIndex) = PShiftStack(:, 1:end-Shift, FrameIndex);
+
+    end
 
 end
