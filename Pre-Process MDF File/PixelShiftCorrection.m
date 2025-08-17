@@ -27,19 +27,19 @@ function PShiftStack = PixelShiftCorrection(Stack, Shift)
     % <End Documentation>
 
     PShiftStack = Stack;
+    [Rows, ~, ~] = size(Stack);
     if Shift == 0
-        return        
-    elseif Shift > 0
-        StartingRow = 1;
-    elseif Shift < 0
-        StartingRow = 2;
+        return
     end
 
-    Shift = abs(Shift);
-    PShiftStack(StartingRow:2:end, 1+Shift:end, :) = Stack(StartingRow:2:end, 1:end-Shift, :);
-    PShiftStack = PShiftStack(:, 1+Shift:end, :);
+    if Shift > 0
+        ShiftingRows = 1:2:Rows;
+    elseif Shift < 0
+        ShiftingRows = 2:2:Rows;
+    end
 
-
-
+    Shift = abs(Shift);    
+    PShiftStack(ShiftingRows, 1+Shift:end, :) = Stack(ShiftingRows, 1:end-Shift, :);
+    PShiftStack = PShiftStack(:, 1:end-Shift, :);
 
 end
