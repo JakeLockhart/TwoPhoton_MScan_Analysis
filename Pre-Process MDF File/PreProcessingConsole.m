@@ -328,7 +328,19 @@ function ProcessingParameters = PreProcessingConsole(Stack)
             end
             
             function Confirm_Callback()
-                Output.KeepFrameRegion = [DeleteFrames_FirstFrame.Value, DeleteFrames_LastFrame.Value];
+                KeepFrameRegion = [DeleteFrames_FirstFrame.Value, DeleteFrames_LastFrame.Value];
+                if KeepFrameRegion(1) > 1
+                    InitialRegion = 1:KeepFrameRegion(1)-1;
+                else
+                    InitialRegion = [];
+                end
+                if KeepFrameRegion(2) < TotalFrames
+                    FinalRegion = KeepFrameRegion(2)+1:TotalFrames;
+                else
+                    FinalRegion = [];
+                end
+
+                Output.FramesToDelete = [InitialRegion, FinalRegion];
                 Output.InterleavedChannels = DeinterleaveFrames_Channels.Value;
                 Output.PixelShiftValue = ApplyPixelShift_Value.Value;
                 Output.ApplyMotionCorrection = ApplyMotionCorrection.Value;
