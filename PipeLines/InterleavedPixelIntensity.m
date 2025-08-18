@@ -1,0 +1,36 @@
+function [obj, PixelIntensity] = InterleavedPixelIntensity(obj)
+    % <Documentation>
+        % InterleavedPixelIntensity()
+        %   
+        %   Created by: jsl5865
+        %   
+        % Syntax:
+        %   
+        % Description:
+        %   
+        % Input:
+        %   
+        % Output:
+        %   
+    % <End Documentation>
+
+    fprintf('Determining the pixel intensity of an ROI from an interleaved image stack\nDraw an ROI on the final deinterleaved stack.\n\n')
+
+    Fields = fieldnames(obj.Stack.Raw);
+    Parameters = structfun(@(Stack) PreProcessingConsole(Stack), ...
+                           obj.Stack.Raw, ...
+                           "UniformOutput", false ...
+                          );
+
+    for i = 1:length(Fields)
+        obj.Stack.Fixed.(Fields{i}) = DeleteFrames(obj.Stack.Raw.(Fields{i}), Parameters.(Fields{i}).FramesToDelete);
+        obj.Stack.Deinterleaved.(Fields{i}) = Deinterleave(obj.Stack.Fixed.(Fields{i}), Parameters.(Fields{i}).InterleavedChannels);
+        obj.ROI = TileStack_DrawROI(struct2cell(obj.Stack.Deinterleaved.(Fields{i})));
+        CommonMask = ~cellfun(@isempty, obj.ROI);
+        CommonROI = obj.ROI{CommonMask}{1};
+
+        obj.Stack.CroppedChannel.(Fields{i}) = structfun(@(Stack) CropStackToMask(Stack, CommonROI), obj.Stack.Deinterleaved.(Fields{i}), "UniformOutput", false );
+    end   
+    
+    PixelIntensity = structfun(@(Stack) PlotZAxisProfile(Stack), obj.Stack.CroppedChannel, "UniformOutput", false);
+end
