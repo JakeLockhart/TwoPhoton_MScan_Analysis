@@ -1,4 +1,4 @@
-function [ProcessingParameters, Window] = PreProcessingConsole(Stack)
+function ProcessingParameters = PreProcessingConsole(Stack)
     % <Documentation>
         % PreProcessingConsole()
         %   
@@ -50,7 +50,7 @@ function [ProcessingParameters, Window] = PreProcessingConsole(Stack)
             ax_DisplayStack.Layout.Row = 1;
             ax_DisplayStack.Layout.Column = 1;
             DisplayStack = imshow(Stack(:,:,Frame), [], 'Parent', ax_DisplayStack);
-
+            
         %% Define image processing parameters
             ControlPanel = uipanel(MainLayout, "Title", 'Control Panel');
             ControlPanel.Layout.Row = 1;
@@ -103,6 +103,7 @@ function [ProcessingParameters, Window] = PreProcessingConsole(Stack)
                                                         'Limits', [1, TotalFrames], ...
                                                         'Value', 1, ...
                                                         'Step', 1, ...
+                                                        'ValueDisplayFormat', '%.0f', ...
                                                         'FontSize', FontSize ...
                                                        );
 
@@ -117,6 +118,7 @@ function [ProcessingParameters, Window] = PreProcessingConsole(Stack)
                                                        'Limits', [1, TotalFrames], ...
                                                        'Value', TotalFrames, ...
                                                        'Step', 1, ...
+                                                       'ValueDisplayFormat', '%.0f', ...
                                                        'FontSize', FontSize ...
                                                       );
 
@@ -140,6 +142,7 @@ function [ProcessingParameters, Window] = PreProcessingConsole(Stack)
                                                             'Limits', [1, Inf], ...
                                                             'Value', 1, ...
                                                             'Step', 1, ...
+                                                            'ValueDisplayFormat', '%.0f', ...
                                                             'FontSize', FontSize, ...
                                                             'ValueChangedFcn', @(src, event) Update_Channels() ...
                                                            );
@@ -168,20 +171,12 @@ function [ProcessingParameters, Window] = PreProcessingConsole(Stack)
                                                       "Limits", [-Inf, Inf], ...
                                                       'Value', 0, ...
                                                       'Step', 1, ...
+                                                      'ValueDisplayFormat', '%.0f', ...
                                                       'FontSize', FontSize, ...
                                                       'ValueChangedFcn', @(src, event) Update_PixelShift() ...
                                                      );
                     TextHeight = ApplyPixelShift_Text1.Position(4);
                     ApplyPixelShift_Value.Position(4) = TextHeight;
-
-                % Remove padding that borders image stack
-                    ApplyPaddingCorrection = uicheckbox(ParametersPanelLayout, ...
-                                                        "Text", 'Remove image stack padding', ...
-                                                        'FontSize', FontSize, ...
-                                                        'Value', true ...
-                                                       );
-                    ApplyPaddingCorrection.Layout.Row = 4;
-                    ApplyPaddingCorrection.Layout.Column = 1;
                 
                 % Apply motion correction to image stack
                     ApplyMotionCorrection = uicheckbox(ParametersPanelLayout, ...
@@ -257,10 +252,9 @@ function [ProcessingParameters, Window] = PreProcessingConsole(Stack)
                     Confirm.Layout.Column = 4;
 
     %% Close figure when finished
-        Output = [];
-        uiwait(Window)
+        Output = struct;
+        waitfor(Window, 'BeingDeleted', true)
         ProcessingParameters = Output;
-        delete(Window)
     
     %% Helper functions
         %% UI controls
@@ -307,14 +301,13 @@ function [ProcessingParameters, Window] = PreProcessingConsole(Stack)
             function Cancel_Callback()
                 Output = NaN;
                 
-                uiresume(Window);
+                delete(Window)
             end
 
             function Reset_Callback()
                 DeleteFrames_FirstFrame.Value = 1;
                 DeleteFrames_LastFrame.Value = TotalFrames;
                 ApplyPixelShift_Value.Value = 0;
-                ApplyPaddingCorrection.Value = true;
                 ApplyMotionCorrection.Value = true;
                 DeinterleaveFrames_Channels.Value = 1;
                 ContrastSlider.Value = [0, 100];
@@ -335,14 +328,12 @@ function [ProcessingParameters, Window] = PreProcessingConsole(Stack)
             end
             
             function Confirm_Callback()
-                Output.DeleteFrameIndex1 = DeleteFrames_FirstFrame.Value;
-                Output.DeleteFrameIndex2 = DeleteFrames_LastFrame.Value;
+                Output.KeepFrameRegion = [DeleteFrames_FirstFrame.Value, DeleteFrames_LastFrame.Value];
                 Output.InterleavedChannels = DeinterleaveFrames_Channels.Value;
                 Output.PixelShiftValue = ApplyPixelShift_Value.Value;
-                Output.ApplyRemovePadding = ApplyPaddingCorrection.Value;
                 Output.ApplyMotionCorrection = ApplyMotionCorrection.Value;
                 Output.Contrast = MinIntensity + (ContrastSlider.Value / 100) * (MaxIntensity - MinIntensity);
 
-                uiresume(Window);
+                delete(Window)
             end
 end
