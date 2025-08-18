@@ -1,2 +1,2 @@
 MDF = MScan_Analysis;
-[MDF, PixelIntensity] = MDF.PixelIntensity_InterleavedStack;
+[MDF, PixelIntensity] = MDF.CalculateMeanPixelIntensity;
