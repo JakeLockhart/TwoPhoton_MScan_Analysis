@@ -16,32 +16,10 @@ classdef MScan_Analysis
 
     %% Callable Functions
     methods (Access = public)
-        function [obj, PixelIntensity] = PixelIntensity_InterleavedStack(obj)
-            fprintf('Deinterleaving image stack...\n')
-
-            sliceViewer(obj.Stack.Raw);
-        
-            fprintf('Removing the startup frames: 1-_')
-            FirstDeleteIndex = input('');
-            fprintf('Removing the ending frames: _-end')
-            SecondDeleteIndex = input('');
-            fprintf('How many channels to deinterleave?')
-            Channels = input('');
-
-            obj.Stack.Fixed = DeleteFrames(obj.Stack.Raw, [1:FirstDeleteIndex, SecondDeleteIndex:length(obj.Stack.Raw)]);
-            obj.Stack.Deinterleaved = Deinterleave(obj.Stack.Fixed, Channels);
-
-            obj.ROI = TileStack_DrawROI(struct2cell(obj.Stack.Deinterleaved));
-            CommonMask = ~cellfun(@isempty, obj.ROI);
-            CommonROI = obj.ROI{CommonMask}{1};
-
-            obj.Stack.CroppedChannel = structfun(@(Stack) CropStackToMask(Stack, CommonROI), ...
-                                                 obj.Stack.Deinterleaved, ...
-                                                 "UniformOutput", false ...
-                                                );
-
-            PixelIntensity = PlotZAxisProfile(obj.Stack.CroppedChannel);
+        function [obj, PixelIntensity] = CalculateMeanPixelIntensity(obj)
+            [obj, PixelIntensity] = InterleavedPixelIntensity(obj);
         end
+        
     end
 
     %% Initialization Functions
@@ -61,7 +39,7 @@ classdef MScan_Analysis
             Stack.Raw = structfun(@(Stack) RemovePadding(Stack), ...
                                   Stack.Raw, ...
                                   "UniformOutput", false);
-            Stack.Raw = structfun(@(Stack) uint16(max(Stack, 0)), ...
+            Stack.Raw = structfun(@(Stack) 32*uint16(max(Stack, 0))-1, ...
                                   Stack.Raw, ...
                                   "UniformOutput", false);
         end
