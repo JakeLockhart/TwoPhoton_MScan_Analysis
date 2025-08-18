@@ -1,17 +1,40 @@
 function ProcessingParameters = PreProcessingConsole(Stack)
     % <Documentation>
         % PreProcessingConsole()
-        %   
+        %   An interactive pre-processing console for an image stack. Allows for dynamic paramameter definitions.
         %   Created by: jsl5865
         %   
         % Syntax:
-        %   
+        %   ProcessingParameters = PreProcessingConsole(Stack)
+        %
         % Description:
+        %   This function creates a UI figure to visualize and adjust user-defined parameters of an input image
+        %       stack. To control the displayed frame both the slider bar below the image and the left/right 
+        %       arrow keys can be used. Parameters are dynamically controlled via input fields under the control
+        %       panel. 
+        %   Parameters are managed via the 'Cancel,' 'Reset,' and 'Confirm' buttons at the bottom of the control
+        %       panel. The buttons perform the following actions:
+        %           -'Cancel' does not save any parameters and closes the window.
+        %           -'Reset' returns all parameters to their default values.
+        %           -'Confirm' saves all parameters to structure and closes the window.   
+        %   Large image stacks may experience slower performance when updating parameters such as the pixel shift.
         %   
         % Input:
-        %   
+        %   Stack - A numerical 3D array representing an image stack, with dimensions Rows x Columns x Frames. 
+        %
         % Output:
-        %   
+        %   ProcessingParameters - A structure containing the user defined image stack parameters.
+        %                           - FramesToDelete
+        %                               - Indicies of beginning and ending frames to be deleted
+        %                           - InterleavedChannels
+        %                               - The number of interleaved channels within the image stack
+        %                           - PixelShiftValue
+        %                               - Applys a pixel shift along the x-axis of the image stack
+        %                           - ApplyMotionCorrection
+        %                               - Flag to apply motion correction during pre-processing
+        %                           - Contrast
+        %                               - Adjust the colormap minimum and maximum limits for pixel intensity
+        %
     % <End Documentation>
 
     %% Initialization
