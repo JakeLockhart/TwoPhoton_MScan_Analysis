@@ -33,7 +33,7 @@ function ROIs = TileStack_DrawROI(Stack)
     % <End Documentation>
 
     %% Initialization
-        ROI_Shape_List = {'Rectangle', 'Circle', 'Line', 'Polygon', 'Freehand'};    % Define available ROI shapes
+        ROI_Shape_List = {'Rectangle', 'Circle', 'Line', 'Spline', 'Polygon', 'Freehand'};    % Define available ROI shapes
         TotalStacks = numel(Stack);                                                 % Define the total image stacks to analyze
         ROIs = cell(1, TotalStacks);                                                % Preallocate cell arrays for each ROIs within each image stack
 

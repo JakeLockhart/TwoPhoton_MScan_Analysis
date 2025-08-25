@@ -1,7 +1,7 @@
 function ROI = DrawMultipleROIs(ax, ROI_Shape, SaveFigure)
     arguments
         ax
-        ROI_Shape char {mustBeMember(ROI_Shape, {'Rectangle', 'Circle', 'Line', 'Polygon', 'Freehand'})} = 'Rectangle'
+        ROI_Shape char {mustBeMember(ROI_Shape, {'Rectangle', 'Circle', 'Line', 'Spline', 'Polygon', 'Freehand'})} = 'Rectangle'
         SaveFigure char = ''
     end
     fprintf('Draw %s ROIs one by one. Double-click region or press enter to confrim and draw another ROI.\nPress Esc to finish...  \n', ROI_Shape)

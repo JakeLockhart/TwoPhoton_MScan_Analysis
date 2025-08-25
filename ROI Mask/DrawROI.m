@@ -1,7 +1,7 @@
 function ROI = DrawROI(ax, ROI_Shape)
     arguments
         ax (1,1) matlab.graphics.axis.Axes
-        ROI_Shape char {mustBeMember(ROI_Shape, {'Rectangle', 'Circle', 'Line', 'Polygon', 'Freehand'})} = 'Rectangle'
+        ROI_Shape char {mustBeMember(ROI_Shape, {'Rectangle', 'Circle', 'Line', 'Spline', 'Polygon', 'Freehand'})} = 'Rectangle'
     end
 
     switch ROI_Shape
@@ -11,6 +11,8 @@ function ROI = DrawROI(ax, ROI_Shape)
             ROI = drawcircle(ax);
         case 'Line'
             ROI = drawline(ax);
+        case 'Spline'
+            ROI = drawfreehand(ax, "Closed", false, "FaceAlpha", 0);
         case 'Polygon'
             ROI = drawpolygon(ax);
         case 'Freehand'
