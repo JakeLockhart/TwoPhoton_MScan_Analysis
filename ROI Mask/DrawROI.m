@@ -21,5 +21,6 @@ function ROI = DrawROI(ax, ROI_Shape)
             error('ROI shape not available')
     end
 
+    AdjustROIThickness(ROI, ax);
     wait(ROI);
 end

@@ -1,4 +1,4 @@
-function ROIs = TileStack_DrawROI(Stack)
+function [ROIs, LineEndPoints] = TileStack_DrawROI(Stack)
     % <Documentation>
         % TileStack_DrawROI()
         %   Interactive interface for drawing multiple ROI shapes on mean projections of one or more image stacks.
@@ -36,6 +36,7 @@ function ROIs = TileStack_DrawROI(Stack)
         ROI_Shape_List = {'Rectangle', 'Circle', 'Line', 'Spline', 'Polygon', 'Freehand'};    % Define available ROI shapes
         TotalStacks = numel(Stack);                                                 % Define the total image stacks to analyze
         ROIs = cell(1, TotalStacks);                                                % Preallocate cell arrays for each ROIs within each image stack
+        LineEndPoints = cell(1, TotalStacks);                                       % Preallocate cell arrays for each ROI, but used only for line/spline segments
 
     %% Create mean projection
         MeanStacks = cellfun(@(x) mean(x, 3), Stack, "UniformOutput", false);   % Average each image stack into a single frame
@@ -109,11 +110,21 @@ function ROIs = TileStack_DrawROI(Stack)
 
             ROI_ChosenShape = DropDown.Value;
             ROI_Object = DrawROI(SelectedAx, ROI_ChosenShape);
+            
             if isempty(ROIs{Index})
                 ROIs{Index} = {createMask(ROI_Object)};
             else
                 ROIs{Index}{end+1} = createMask(ROI_Object);
             end
+            
+            if any(strcmp(ROI_ChosenShape, {'Line','Spline'}))
+                if isempty(LineEndPoints{Index})
+                    LineEndPoints{Index} = {ROI_Object.Position};
+                else
+                    LineEndPoints{Index}{end+1} = ROI_Object.Position;
+                end
+            end
+
         end
 
 end
