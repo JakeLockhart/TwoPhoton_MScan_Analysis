@@ -37,6 +37,7 @@ function [ROIs, LineEndPoints] = TileStack_DrawROI(Stack)
         TotalStacks = numel(Stack);                                                 % Define the total image stacks to analyze
         ROIs = cell(1, TotalStacks);                                                % Preallocate cell arrays for each ROIs within each image stack
         LineEndPoints = cell(1, TotalStacks);                                       % Preallocate cell arrays for each ROI, but used only for line/spline segments
+        ROI_Counter = zeros(1, TotalStacks);                                        % Track the number of ROIs per image stack
 
     %% Create mean projection
         MeanStacks = cellfun(@(x) mean(x, 3), Stack, "UniformOutput", false);   % Average each image stack into a single frame
@@ -91,6 +92,10 @@ function [ROIs, LineEndPoints] = TileStack_DrawROI(Stack)
     %% Close figure when finished
         uiwait(Window); % Wait until the 'Done' button has been selected (uiresume(Window))
         close(Window);  % Close the figure window
+        for i = 1:length(ROIs)
+            ROIs{i} = fliplr(ROIs{i});
+            LineEndPoints{i} = fliplr(LineEndPoints{i});
+        end
 
     %% Helper functions
         function SetSelectedAx(src)
@@ -111,18 +116,14 @@ function [ROIs, LineEndPoints] = TileStack_DrawROI(Stack)
             ROI_ChosenShape = DropDown.Value;
             ROI_Object = DrawROI(SelectedAx, ROI_ChosenShape);
             
-            if isempty(ROIs{Index})
-                ROIs{Index} = {createMask(ROI_Object)};
-            else
-                ROIs{Index}{end+1} = createMask(ROI_Object);
-            end
+            ROI_Counter(Index) = ROI_Counter(Index) + 1;
+            CurrentROI = ROI_Counter(Index);
+            ROIs{Index}{CurrentROI} = createMask(ROI_Object);
             
             if any(strcmp(ROI_ChosenShape, {'Line','Spline'}))
-                if isempty(LineEndPoints{Index})
-                    LineEndPoints{Index} = {ROI_Object.Position};
-                else
-                    LineEndPoints{Index}{end+1} = ROI_Object.Position;
-                end
+                LineEndPoints{Index}{CurrentROI} = ROI_Object.Position;
+            else
+                LineEndPoints{Index}{CurrentROI} = NaN;
             end
 
         end
