@@ -33,10 +33,11 @@ function MedianFilteredStack = MedianFilter_2D(Stack, PixelNeighborhood)
 
     Rows = PixelNeighborhood(1,1);
     Columns = PixelNeighborhood(1,2);
+    Frames = PixelNeighborhood(1,3);
     MedianFilteredStack = zeros(size(Stack), "like", Stack);
     
     for k = 1:size(Stack, 3)
-        MedianFilteredStack(:,:,k) = medfilt2(Stack(:,:,k), [Rows, Columns]);
+        MedianFilteredStack(:,:,k) = medfilt3(Stack(:,:,k), [Rows, Columns, Frames]);
     end
 
 end
