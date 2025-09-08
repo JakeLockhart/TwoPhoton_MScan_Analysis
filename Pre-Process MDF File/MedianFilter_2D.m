@@ -28,7 +28,7 @@ function MedianFilteredStack = MedianFilter_2D(Stack, PixelNeighborhood)
 
     arguments
         Stack
-        PixelNeighborhood(1,2) {mustBeNumeric, mustBeInteger, mustBePositive} = [1,1]
+        PixelNeighborhood(1,3) {mustBeNumeric, mustBeInteger, mustBePositive} = [1,1,1]
     end
 
     Rows = PixelNeighborhood(1,1);
@@ -36,8 +36,14 @@ function MedianFilteredStack = MedianFilter_2D(Stack, PixelNeighborhood)
     Frames = PixelNeighborhood(1,3);
     MedianFilteredStack = zeros(size(Stack), "like", Stack);
     
-    for k = 1:size(Stack, 3)
-        MedianFilteredStack(:,:,k) = medfilt3(Stack(:,:,k), [Rows, Columns, Frames]);
+    if PixelNeighborhood(1,3) == 1
+        for k = 1:size(Stack,3)
+            MedianFilteredStack(:,:,k) = medfilt2(Stack(:,:,k), [Rows, Columns, Frames]);
+        end
+    else
+        for k = 1:size(Stack, 3)
+            MedianFilteredStack(:,:,k) = medfilt3(Stack(:,:,k), [Rows, Columns, Frames]);
+        end
     end
-
+    
 end
