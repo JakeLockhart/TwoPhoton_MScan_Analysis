@@ -1,4 +1,4 @@
-function MedianFilteredStack = MedianFilter_2D(Stack, PixelNeighborhood)
+function MedianFilteredStack = MedianFilter(Stack, PixelNeighborhood)
     % <Documentation>
         % MedianFilter()
         %   Applies a 2D median filter to each frame of an image stack to reduce noise.
