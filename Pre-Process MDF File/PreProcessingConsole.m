@@ -51,6 +51,7 @@ function ProcessingParameters = PreProcessingConsole(Stack)
         BottomEdge = (ScreenSize(4) - WindowSize(2)) / 2;
 
         FontSize = 14;
+        SpinnerWidth = 75;
 
     %% Create UI figure
         %% Define UI layout
@@ -106,14 +107,14 @@ function ProcessingParameters = PreProcessingConsole(Stack)
                 ParametersPanel.Layout.Row = 1;
                 ParametersPanel.Layout.Column = 1;
 
-                ParametersPanelLayout = uigridlayout(ParametersPanel, [5,1]);
-                ParametersPanelLayout.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit'};
+                ParametersPanelLayout = uigridlayout(ParametersPanel, [7,1]);
+                ParametersPanelLayout.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
                 ParametersPanelLayout.ColumnWidth = {'1x'};
 
                 % Control the frames to keep from the original image stack
                     DeleteFrames = uigridlayout(ParametersPanelLayout, [1,4]);
                     DeleteFrames.RowHeight = {'fit'};
-                    DeleteFrames.ColumnWidth = {'fit', 'fit', 'fit', 'fit'};
+                    DeleteFrames.ColumnWidth = {'fit', SpinnerWidth, 'fit', SpinnerWidth};
 
                     DeleteFrames_Text1 = uilabel(DeleteFrames, ...
                                                  'Text', 'Keep frames from ', ...
@@ -153,7 +154,7 @@ function ProcessingParameters = PreProcessingConsole(Stack)
                 % Deinterleave the image stack in to _ channels
                     DeinterleaveFrames = uigridlayout(ParametersPanelLayout, [1,3]);
                     DeinterleaveFrames.RowHeight = {'fit'};
-                    DeinterleaveFrames.ColumnWidth = {'fit', 'fit', 'fit'};
+                    DeinterleaveFrames.ColumnWidth = {'fit', SpinnerWidth, 'fit'};
 
                     DeinterleaveFrames_Text1 = uilabel(DeinterleaveFrames, ...
                                                        'Text', 'Deinterleave stack into ', ...
@@ -182,7 +183,7 @@ function ProcessingParameters = PreProcessingConsole(Stack)
                 % Apply pixel shift
                     ApplyPixelShift = uigridlayout(ParametersPanelLayout, [1,2]);
                     ApplyPixelShift.RowHeight = {'fit'};
-                    ApplyPixelShift.ColumnWidth = {'fit', 'fit'};
+                    ApplyPixelShift.ColumnWidth = {'fit', SpinnerWidth};
 
                     ApplyPixelShift_Text1 = uilabel(ApplyPixelShift, ...
                                                     "Text", "Shift pixels along x-axis ", ...
@@ -201,6 +202,58 @@ function ProcessingParameters = PreProcessingConsole(Stack)
                     TextHeight = ApplyPixelShift_Text1.Position(4);
                     ApplyPixelShift_Value.Position(4) = TextHeight;
                 
+                % Apply median filter
+                    ApplyMedianFilter = uigridlayout(ParametersPanelLayout, [1,4]);
+                    ApplyMedianFilter.RowHeight = {'fit'};
+                    ApplyMedianFilter.ColumnWidth = {'fit', SpinnerWidth, SpinnerWidth, SpinnerWidth};
+
+                    ApplyMedianFilter_Text1 = uilabel(ApplyMedianFilter, ...
+                                                      "Text", "Median filter (x,y,z)", ...
+                                                      'FontSize', FontSize, ...
+                                                      'VerticalAlignment', 'center', ...
+                                                      'HorizontalAlignment', 'left' ...
+                                                     );
+                                                    ApplyMedianFilter_Text1.Layout.Row = 1;
+                                                    ApplyMedianFilter_Text1.Layout.Column = 1;
+                    ApplyMedianFilter_RowNeighbors = uispinner(ApplyMedianFilter, ...
+                                                               "Limits", [1,Inf], ...
+                                                               'Value', 1, ...
+                                                               'Step', 1, ...
+                                                               'ValueDisplayFormat', '%.0f', ...
+                                                               'FontSize', FontSize, ...
+                                                               'ValueChangedFcn', @(src, event) Update_MedianFilter() ...    
+                                                              );
+                                                              ApplyMedianFilter_RowNeighbors.Layout.Row = 1;
+                                                              ApplyMedianFilter_RowNeighbors.Layout.Column = 2;
+                    ApplyMedianFilter_ColumnNeighbors = uispinner(ApplyMedianFilter, ...
+                                                                  "Limits", [1,Inf], ...
+                                                                  'Value', 1, ...
+                                                                  'Step', 1, ...
+                                                                  'ValueDisplayFormat', '%.0f', ...
+                                                                  'FontSize', FontSize, ...
+                                                                  'ValueChangedFcn', @(src, event) Update_MedianFilter() ...
+                                                                );
+                                                                ApplyMedianFilter_ColumnNeighbors.Layout.Row = 1;
+                                                                ApplyMedianFilter_ColumnNeighbors.Layout.Column = 3;
+                    ApplyMedianFilter_FrameNeighbors = uispinner(ApplyMedianFilter, ...
+                                                                  "Limits", [1,Inf], ...
+                                                                  'Value', 1, ...
+                                                                  'Step', 1, ...
+                                                                  'ValueDisplayFormat', '%.0f', ...
+                                                                  'FontSize', FontSize, ...
+                                                                  'ValueChangedFcn', @(src, event) Update_MedianFilter() ...
+                                                                );
+                                                                ApplyMedianFilter_FrameNeighbors.Layout.Row = 1;
+                                                                ApplyMedianFilter_FrameNeighbors.Layout.Column = 4;
+                    TextHeight = ApplyMedianFilter_Text1.Position(4);
+                    ApplyMedianFilter_RowNeighbors.Position(4) = TextHeight;
+                    ApplyMedianFilter_ColumnNeighbors.Position(4) = TextHeight;
+                    ApplyMedianFilter_FrameNeighbors.Position(4) = TextHeight;
+
+                % Apply butterworth filter
+                    % ApplyButterworthFilter = uigridlayout
+                    
+
                 % Apply motion correction to image stack
                     ApplyMotionCorrection = uicheckbox(ParametersPanelLayout, ...
                                                        "Text", 'Apply motion correction', ...
@@ -320,6 +373,17 @@ function ProcessingParameters = PreProcessingConsole(Stack)
                 DisplayStack.Parent.CLim = ContrastRange;
             end
 
+            function Update_MedianFilter
+                Rows = ApplyMedianFilter_RowNeighbors.Value;
+                Columns = ApplyMedianFilter_ColumnNeighbors.Value;
+                Frames = ApplyMedianFilter_FrameNeighbors.Value;
+
+                UI_PixelNeighborhood = [Rows, Columns, Frames];
+
+                MedianFilteredFrame = MedianFilter(Stack(:,:,Frame), UI_PixelNeighborhood);
+                DisplayStack.CData = MedianFilteredFrame;
+            end
+
         %% Callback functions to save parameters
             function Cancel_Callback()
                 Output = NaN;
@@ -334,6 +398,9 @@ function ProcessingParameters = PreProcessingConsole(Stack)
                 ApplyMotionCorrection.Value = true;
                 DeinterleaveFrames_Channels.Value = 1;
                 ContrastSlider.Value = [0, 100];
+                ApplyMedianFilter_RowNeighbors.Value = 1;
+                ApplyMedianFilter_ColumnNeighbors.Value = 1;
+                ApplyMedianFilter_FrameNeighbors.Value = 1;
 
                 Frame = 1;
                 FrameSlider.Value = Frame;
@@ -341,6 +408,7 @@ function ProcessingParameters = PreProcessingConsole(Stack)
                 UI_Shift = ApplyPixelShift_Value.Value;
                 Shifted = PixelShiftCorrection(Stack, UI_Shift);
                 DisplayStack.CData = Shifted(:,:,Frame);
+                DisplayStack.CData = Stack(:,:,Frame);
                 DisplayStack.Parent.CLim = [0,65535];
 
                 CurrentFrame.Text = sprintf('Frame %d/%d\tPixel Shift: %d\tTotal Imaging Channels: %d', Frame, TotalFrames, UI_Shift, UI_Channels);
@@ -368,6 +436,7 @@ function ProcessingParameters = PreProcessingConsole(Stack)
                 Output.PixelShiftValue = ApplyPixelShift_Value.Value;
                 Output.ApplyMotionCorrection = ApplyMotionCorrection.Value;
                 Output.Contrast = MinIntensity + (ContrastSlider.Value / 100) * (MaxIntensity - MinIntensity);
+                Output.PixelNeighborhood = [ApplyMedianFilter_RowNeighbors.Value, ApplyMedianFilter_ColumnNeighbors.Value, ApplyMedianFilter_FrameNeighbors.Value];
 
                 delete(Window)
             end
