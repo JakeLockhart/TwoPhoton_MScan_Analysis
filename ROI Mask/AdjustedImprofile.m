@@ -30,13 +30,12 @@ function ROIProfile = AdjustedImprofile(Image, LineEndPoints, LineWidth)
     UnitVectorX = -sin(Theta);
     UnitVectorY = cos(Theta);
 
-    Temp = zeros(length(X), 2*ROI_HalfWidth+1);
-    for i = -ROI_HalfWidth:ROI_HalfWidth
-        OffsetX = X + i * UnitVectorX;
-        OffsetY = Y + i * UnitVectorY;
-        Temp(:, i+ROI_HalfWidth+1) = interp2(double(Image), OffsetX, OffsetY, "linear", 0); 
-    end
+    Offsets = -ROI_HalfWidth:ROI_HalfWidth;
+    OffsetX = X + UnitVectorX * Offsets;
+    OffsetY = Y + UnitVectorY * Offsets;
 
-    ROIProfile = mean(Temp, 2, 'omitnan');
+    Values = interp2(double(Image), OffsetX, OffsetY, "linear", 0);
+
+    ROIProfile = mean(Values, 2, 'omitnan');
 
 end
