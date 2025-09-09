@@ -38,6 +38,7 @@ function [MetaData, AnalogData] = MDF_AnalogChannel(MCS, MetaData)
                 if strcmpi(FieldName, '')
                     fprintf('\tAnalog channel %s not detected\n', i)
                 else
+                    FieldName = matlab.lang.makeValidName(FieldName);
                     I = str2double(i);
                     AC_Channel(I+1) = I;
                     AC_Name(I+1) = string(FieldName);
