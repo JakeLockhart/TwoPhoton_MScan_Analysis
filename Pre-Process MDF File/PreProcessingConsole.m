@@ -45,6 +45,12 @@ function ProcessingParameters = PreProcessingConsole(Stack)
         MinIntensity = 0;
         MaxIntensity = 65535;
 
+        AppState.Frame = Frame;
+        AppState.UI_Shift = UI_Shift;
+        AppState.UI_Channels = UI_Channels;
+        AppState.ContrastRange = [MinIntensity, MaxIntensity];
+        AppState.UI_PixelNeighborhood = [1, 1, 1];
+
         ScreenSize = get(0, 'ScreenSize');
         WindowSize = [900, 600];
         LeftEdge = (ScreenSize(3) - WindowSize(1)) / 2;
@@ -52,6 +58,8 @@ function ProcessingParameters = PreProcessingConsole(Stack)
 
         FontSize = 14;
         SpinnerWidth = 75;
+
+
 
     %% Create UI figure
         %% Define UI layout
@@ -334,55 +342,87 @@ function ProcessingParameters = PreProcessingConsole(Stack)
     
     %% Helper functions
         %% UI controls
-            function Update_Frame(NewFrame)
-                Frame = NewFrame;
-                DisplayStack.CData = Stack(:,:,Frame);
-                CurrentFrame.Text = sprintf('Frame %d/%d	Pixel Shift: %d	Total Imaging Channels: %d', Frame, TotalFrames, UI_Shift, UI_Channels);
-                FrameSlider.Value = Frame;
-            end
 
             function KeyPressHandler(~, event)
                 switch event.Key
                     case 'rightarrow'
-                        if Frame < TotalFrames
-                            Frame = Frame + 1;
-                            Update_Frame(Frame);
-                        end
+                        newFrame = min(AppState.Frame + 1, TotalFrames);
+                        Update_Frame(newFrame);
                     case 'leftarrow'
-                        if Frame > 1
-                            Frame = Frame - 1;
-                            Update_Frame(Frame);
-                        end
+                        newFrame = max(AppState.Frame - 1, 1);
+                        Update_Frame(newFrame);
                 end
             end
 
+            function Update_Frame(NewFrame)
+                AppState.Frame = NewFrame;
+                FrameSlider.Value = NewFrame;
+                Update_Display();
+            end
+
             function Update_PixelShift()
-                UI_Shift = ApplyPixelShift_Value.Value;
-                ShiftedStack = PixelShiftCorrection(Stack, UI_Shift, 'SingleFrame', Frame);
-                DisplayStack.CData = ShiftedStack(:,:,Frame);
-                CurrentFrame.Text = sprintf('Frame %d/%d\tPixel Shift: %d\tTotal Imaging Channels: %d', Frame, TotalFrames, UI_Shift, UI_Channels);
+                AppState.UI_Shift = ApplyPixelShift_Value.Value;
+                Update_Display();
             end
 
-            function Update_Channels
-                UI_Channels = DeinterleaveFrames_Channels.Value;
-                CurrentFrame.Text = sprintf('Frame %d/%d\tPixel Shift: %d\tTotal Imaging Channels: %d', Frame, TotalFrames, UI_Shift, UI_Channels);
+            function Update_Channels()
+                AppState.UI_Channels = DeinterleaveFrames_Channels.Value;
+                Update_Display();
             end
 
-            function Update_Contrast(DisplayStack, ContrastRange)
-                ContrastRange = MinIntensity + (ContrastRange / 100) * (MaxIntensity - MinIntensity);
-                DisplayStack.Parent.CLim = ContrastRange;
+            function Update_Contrast()
+                % Assuming ContrastSlider.Value is [minPercent, maxPercent] in [0, 100]
+                rawContrast = ContrastSlider.Value; % [minPercent, maxPercent]
+                minVal = MinIntensity + (rawContrast(1)/100) * (MaxIntensity - MinIntensity);
+                maxVal = MinIntensity + (rawContrast(2)/100) * (MaxIntensity - MinIntensity);
+                if minVal >= maxVal
+                    maxVal = minVal + 1; % Ensure valid range
+                end
+                AppState.ContrastRange = [minVal, maxVal];
+                Update_Display();
             end
 
-            function Update_MedianFilter
-                Rows = ApplyMedianFilter_RowNeighbors.Value;
-                Columns = ApplyMedianFilter_ColumnNeighbors.Value;
-                Frames = ApplyMedianFilter_FrameNeighbors.Value;
-
-                UI_PixelNeighborhood = [Rows, Columns, Frames];
-
-                MedianFilteredFrame = MedianFilter(Stack(:,:,Frame), UI_PixelNeighborhood);
-                DisplayStack.CData = MedianFilteredFrame;
+            function Update_MedianFilter()
+                r = ApplyMedianFilter_RowNeighbors.Value;
+                c = ApplyMedianFilter_ColumnNeighbors.Value;
+                f = ApplyMedianFilter_FrameNeighbors.Value;
+                AppState.UI_PixelNeighborhood = [r c f];
+                Update_Display();
             end
+
+            function Update_Display()
+                % Always use the original stack for frame navigation
+                frameIdx = AppState.Frame;
+                RawFrame = Stack(:,:,frameIdx);
+
+                % Apply pixel shift only to the current frame
+                ShiftedFrame = PixelShiftCorrection(Stack, AppState.UI_Shift, 'SingleFrame', frameIdx);
+                ShiftedFrame = ShiftedFrame(:,:,frameIdx); % Ensure we get only the current frame
+
+                % Pad or trim columns to match original size
+                [~, origCols] = size(RawFrame);
+                [~, shiftCols] = size(ShiftedFrame);
+                if shiftCols < origCols
+                    ShiftedFrame(:, end+1:origCols) = 0;
+                elseif shiftCols > origCols
+                    ShiftedFrame = ShiftedFrame(:, 1:origCols);
+                end
+
+                % Apply median filter only to the current frame
+                FilteredFrame = MedianFilter(ShiftedFrame, AppState.UI_PixelNeighborhood);
+
+                % Update display
+                DisplayStack.CData = FilteredFrame;
+                clim = AppState.ContrastRange;
+                if clim(1) >= clim(2)
+                    clim(2) = clim(1) + 1;
+                end
+                DisplayStack.Parent.CLim = clim;
+                CurrentFrame.Text = sprintf('Frame %d/%d\tPixel Shift: %d\tTotal Imaging Channels: %d', ...
+                                            frameIdx, TotalFrames, AppState.UI_Shift, AppState.UI_Channels ...
+                                           );
+            end
+
 
         %% Callback functions to save parameters
             function Cancel_Callback()
@@ -415,7 +455,70 @@ function ProcessingParameters = PreProcessingConsole(Stack)
             end
 
             function Preview_Callback()
-                
+                % Get current settings
+                firstFrame = DeleteFrames_FirstFrame.Value;
+                lastFrame = DeleteFrames_LastFrame.Value;
+                pixelShift = ApplyPixelShift_Value.Value;
+                channels = DeinterleaveFrames_Channels.Value;
+                contrast = AppState.ContrastRange;
+                pixelNeighborhood = AppState.UI_PixelNeighborhood;
+                % motionCorrection = ApplyMotionCorrection.Value;
+
+                % Apply settings to the selected frame range
+                framesToShow = firstFrame:lastFrame;
+                previewStack = Stack(:,:,framesToShow);
+                numFrames = numel(framesToShow);
+
+                % Apply pixel shift and median filter to each frame
+                processedStack = zeros(size(previewStack), 'like', previewStack);
+                for k = 1:numFrames
+                    shifted = PixelShiftCorrection(previewStack, pixelShift, 'SingleFrame', k);
+                    shifted = shifted(:,:,k);
+                    filtered = MedianFilter(shifted, pixelNeighborhood);
+                    processedStack(:,:,k) = filtered;
+                end
+
+                if channels > 1
+                    % Deinterleave and open a slice viewer for each channel
+                    Deinterleaved = Deinterleave(processedStack, channels);
+                    channelNames = fieldnames(Deinterleaved);
+                    for c = 1:numel(channelNames)
+                        channelStack = Deinterleaved.(channelNames{c});
+                        nFrames = size(channelStack,3);
+                        f = figure('Name', sprintf('Preview: %s', channelNames{c}), 'NumberTitle', 'off');
+                        sliceIdx = round(nFrames/2);
+                        ax = axes(f);
+                        im = imshow(channelStack(:,:,sliceIdx), [], 'Parent', ax);
+                        ax.CLim = contrast;
+                        title(ax, sprintf('Frame %d/%d', framesToShow(sliceIdx), framesToShow(end)));
+                        slider = uicontrol('Style', 'slider', 'Min', 1, 'Max', nFrames, 'Value', sliceIdx, ...
+                            'SliderStep', [1/(nFrames-1) 1/(nFrames-1)], 'Units', 'normalized', 'Position', [0.2 0.01 0.6 0.05]);
+                        addlistener(slider, 'Value', 'PostSet', @(src, event) updatePreviewFcn(im, ax, channelStack, framesToShow, contrast, slider));
+                    end
+                else
+                    % Single channel: show preview in one figure
+                    f = figure('Name', 'Preview: Processed Slice View', 'NumberTitle', 'off');
+                    sliceIdx = round(numFrames/2);
+                    ax = axes(f);
+                    im = imshow(processedStack(:,:,sliceIdx), [], 'Parent', ax);
+                    ax.CLim = contrast;
+                    title(ax, sprintf('Frame %d/%d', framesToShow(sliceIdx), framesToShow(end)));
+                    slider = uicontrol('Style', 'slider', 'Min', 1, 'Max', numFrames, 'Value', sliceIdx, ...
+                        'SliderStep', [1/(numFrames-1) 1/(numFrames-1)], 'Units', 'normalized', 'Position', [0.2 0.01 0.6 0.05]);
+                    addlistener(slider, 'Value', 'PostSet', @(src, event) updatePreviewFcn(im, ax, processedStack, framesToShow, contrast, slider));
+                end
+            end
+
+            function updatePreviewFcn(im, ax, stack, framesToShow, contrast, slider)
+                idx = round(slider.Value);
+                im.CData = stack(:,:,idx);
+                % Use AppState.ContrastRange for CLim
+                clim = AppState.ContrastRange;
+                if clim(1) >= clim(2)
+                    clim(2) = clim(1) + 1;
+                end
+                ax.CLim = clim;
+                title(ax, sprintf('Frame %d/%d', framesToShow(idx), framesToShow(end)));
             end
             
             function Confirm_Callback()
