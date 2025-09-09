@@ -38,7 +38,7 @@ function MedianFilteredStack = MedianFilter(Stack, PixelNeighborhood)
     
     if PixelNeighborhood(1,3) == 1
         for k = 1:size(Stack,3)
-            MedianFilteredStack(:,:,k) = medfilt2(Stack(:,:,k), [Rows, Columns, Frames]);
+            MedianFilteredStack(:,:,k) = medfilt2(Stack(:,:,k), [Rows, Columns]);
         end
     else
         for k = 1:size(Stack, 3)
