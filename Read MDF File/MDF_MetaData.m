@@ -34,6 +34,7 @@ function MetaData = MDF_MetaData(MCS)
     MetaData.Notes.ObjectivePositionY       = MCS.ReadParameter('Z Position');
     MetaData.Notes.ObjectivePositionZ       = MCS.ReadParameter('Y Position'); 
     MetaData.Notes.MicronsPerPixel          = MCS.ReadParameter('Microns per Pixel');
+    MetaData.Notes.MicronsPerPixel          = str2double(regexprep(MetaData.Notes.MicronsPerPixel, '[^\d\.\-eE]', ''));
     MetaData.Notes.Magnification            = MCS.ReadParameter('Magnification');
     MetaData.Notes.LaserPower               = MCS.ReadParameter('Laser intensity');
     MetaData.Notes.LaserWavelength          = strcat(MCS.ReadParameter('Laser Wavelength (nm)'),'nm');
