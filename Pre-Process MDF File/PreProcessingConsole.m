@@ -509,7 +509,7 @@ function ProcessingParameters = PreProcessingConsole(Stack)
                 end
             end
 
-            function updatePreviewFcn(im, ax, stack, framesToShow, contrast, slider)
+            function updatePreviewFcn(im, ax, stack, framesToShow, slider)
                 idx = round(slider.Value);
                 im.CData = stack(:,:,idx);
                 % Use AppState.ContrastRange for CLim
