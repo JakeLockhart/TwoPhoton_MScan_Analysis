@@ -30,7 +30,6 @@ function ShowPairedStacks(Stack1, Stack2)
         %
     % <End Documentation>
 
-
     %% Validate stacks 
         if ~isequal(size(Stack1, 3), size(Stack2, 3))
             error('Stacks have a different number of total frames.')
@@ -42,8 +41,8 @@ function ShowPairedStacks(Stack1, Stack2)
     %% Create UI figure
         %% Define UI layout        
             Window = uifigure('Name', 'Displaying paired imaging channel');
-            MainLayout = uigridlayout(Window, [2,1]);
-            MainLayout.RowHeight = {'1x', 50};
+            MainLayout = uigridlayout(Window, [3,1]);
+            MainLayout.RowHeight = {'1x', 50, 50};
             MainLayout.ColumnWidth = {'1x'};
 
         %% Paired image stack panel
@@ -61,13 +60,19 @@ function ShowPairedStacks(Stack1, Stack2)
             ax2 = nexttile(Tiles);
             ImageStack2 = imshow(Stack2(:,:,Frame), [], 'Parent', ax2);
 
-        %% Control: Slider
+        %% Controls: Slider bar, Convert RGB/Grayscale
             SliderBar = uislider(MainLayout, ...
                                  'Limits', [1, TotalFrames], ...
                                  'Value', Frame, ...
                                  'ValueChangingFcn', @(src, event) UpdateFrame(round(event.Value)) ...
                                 );
-            SliderBar.Layout.Row = 2;
+            SliderBar.Layout.Row = 3;
+
+            Convert = uibutton(MainLayout, ...
+                               "Text", "RGB/Grayscale", ...
+                               'ButtonPushedFcn', @Helper_ConvertColorMap ...
+                              );
+            Convert.Layout.Row = 2;
 
     %% Helper functions
         function UpdateFrame(Frame)
