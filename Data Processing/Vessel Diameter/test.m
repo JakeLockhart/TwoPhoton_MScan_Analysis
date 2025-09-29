@@ -1,3 +1,38 @@
+%% Original script from the VesselDiameterAnalysis_FWHM.m Pipeline
+    % TimeAxis = (0:size(FWHM, 1) - 1) / FPS;
+
+
+    % figure
+    % t = tiledlayout(length(ROIs), 1, "TileSpacing", "compact");
+    % PixelNeighborhood = 10;
+
+    % for i = 1:length(ROIs)
+    %     nexttile
+    %     NormalizedFWHM(:,i) = (FWHM(:,i) - mean(FWHM(:,i)))/mean(FWHM(:,i));
+    %     FilteredFWHM(:,i) = medfilt1(NormalizedFWHM(:,i), PixelNeighborhood);
+
+    %     [Peaks, Locations, Widths, Prominence] = findpeaks(FilteredFWHM(:,i), TimeAxis, "MinPeakProminence", 0.2, "WidthReference", "halfheight");
+    %     for j = 1:length(Peaks)
+    %         LeftEdge = Locations(j) - Widths(j)/2;
+    %         RightEdge = Locations(j) + Widths(j)/2;
+
+    %         [~, Index1] = min(abs(TimeAxis - LeftEdge));
+    %         [~, Index2] = min(abs(TimeAxis - RightEdge));
+
+    %         Index1 = max(1, Index1);
+    %         Index2 = min(length(TimeAxis), Index2);
+
+    %         hold on
+    %         plot(TimeAxis, NormalizedFWHM(:,i), "Color", [0.7, 0.7, 0.7], "DisplayName", "Normalized Raw Data (ΔD/D̄)");
+    %         plot(TimeAxis, FilteredFWHM(:,i), "Color", "b", "LineWidth", 1, "DisplayName", sprintf("Median Filtered %g", PixelNeighborhood));
+    %         plot(Locations, Peaks, 'rv', 'MarkerFaceColor', 'r', "DisplayName", "Peak Dilations")
+
+
+    %     end
+    %     [CorrelationCoefficient{i,j}, Lag{i,j}] = CrossCorrelation(ROIs{1}, ROIs{i}, [Index1, Index2]);
+    % end
+
+%%
 % Preprocessing
 figure
 numROIs = length(ROIs);
@@ -13,6 +48,11 @@ NormalizedFWHM = zeros(length(TimeAxis), numROIs);
 for i = 1:numROIs
     nexttile
     NormalizedFWHM(:,i) = (FWHM(:,i) - mean(FWHM(:,i))) / mean(FWHM(:,i));
+    MeanFWHM(:,i) = mean(FWHM(:,i));
+    Sigma(:,i) = std(FWHM(:,i));
+    NormalizedFWHM_Z(:,i) = (FWHM(:,i) - MeanFWHM(:,i)) / Sigma(:,i);
+    FilteredFWHM_Z(:,i) = medfilt1(NormalizedFWHM_Z(:,i), PixelNeighborhood);
+
     FilteredFWHM(:,i) = medfilt1(NormalizedFWHM(:,i), PixelNeighborhood);
     [Peaks, Locations, Widths, Prominence] = findpeaks(FilteredFWHM(:,i), TimeAxis, "MinPeakProminence", 0.2, "WidthReference", "halfheight");
     AllPeaks{i} = Peaks;
