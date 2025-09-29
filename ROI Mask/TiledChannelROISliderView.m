@@ -16,7 +16,7 @@ function [ImageInfo, FigureWindow] = TiledChannelROISliderView(ImageStacks, Rows
 
     arguments
         ImageStacks
-        Rows {mustBeNumeric, mustBePositive} = 1 %#ok<UNUSED>
+        Rows {mustBeNumeric, mustBePositive} = 1 %#ok<INUSA>
         Masks cell = {}
     end
 
@@ -72,7 +72,7 @@ function [ImageInfo, FigureWindow] = TiledChannelROISliderView(ImageStacks, Rows
             hold(ax(i), 'on');
             B = bwboundaries(Masks{i}(:,:,1));
             BoundaryPlots{i} = gobjects(length(B),1);
-            for k = 1:length(B)
+            for k = 1:length(B)%#ok<FXUP>
                 BoundaryPlots{i}(k) = plot(ax(i), B{k}(:,2), B{k}(:,1), 'r', 'LineWidth', 1.5);
             end
             hold(ax(i), 'off');
@@ -169,7 +169,7 @@ function [ImageInfo, FigureWindow] = TiledChannelROISliderView(ImageStacks, Rows
             hold(ax(idx), 'on');
             B = bwboundaries(Masks{idx}(:,:,sliceIdx));
             BoundaryPlots{idx} = gobjects(length(B),1);
-            for k = 1:length(B)
+            for k = 1:length(B)%#ok<FXUP>
                 BoundaryPlots{idx}(k) = plot(ax(idx), B{k}(:,2), B{k}(:,1), 'r', 'LineWidth', 1.5);
             end
             hold(ax(idx), 'off');
