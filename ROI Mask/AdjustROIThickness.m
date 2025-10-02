@@ -14,7 +14,7 @@ function AdjustROIThickness(ROI, ax)
         %   
     % <End Documentation>
 
-    Step = 0.5;
+    Step = 1;
 
     if isprop(ROI, 'LineWidth')
         ROI.LineWidth = 2;
@@ -25,9 +25,9 @@ function AdjustROIThickness(ROI, ax)
 
     function AdjustLineWidth(event, ROI)
         if isvalid(ROI) && isprop(ROI, 'LineWidth')
-            AdjustedWidth = ROI.LineWidth + Step * sign(event.VerticalScrollCount);
+            AdjustedWidth = ROI.LineWidth + Step * -sign(event.VerticalScrollCount);
 
-            ROI.LineWidth = max(0.5, min(AdjustedWidth, 10));
+            ROI.LineWidth = max(0.5, min(AdjustedWidth, 100));
         end
     end
 end
