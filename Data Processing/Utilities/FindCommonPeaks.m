@@ -1,4 +1,4 @@
-function [PeakLocations, PeakWidths] =FindCommonPeaks(VectorArray, TimeAxis, MinProminence)
+function [PeakLocations, PeakWidths] = FindCommonPeaks(VectorArray, TimeAxis, MinProminence)
     % <Documentation>
         % FindCommonPeaks()
         %   
