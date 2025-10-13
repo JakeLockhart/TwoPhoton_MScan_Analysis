@@ -21,7 +21,7 @@ function NormalizedSignal = Normalization_Mean(Signal)
         %   
     % <End Documentation>
 
-    AverageSignal = mean(Signal);
-    NormalizedSignal = (Signal - AverageSignal) / AverageSignal;
+    AverageSignal = mean(Signal, 1);
+    NormalizedSignal = (Signal - AverageSignal) ./ AverageSignal;
 
 end
