@@ -17,7 +17,7 @@ function [CorrelationMatrix, Lag] = SlidingCrossCorrelation(ReferenceSignal, Tar
     TotalIndices = length(ReferenceSignal);
     TotalWindows = TotalIndices - WindowSize + 1;
     
-    [DemoCC, Lag] = CrossCorrelation(DemoReference, DemoTarget, [1, WindowSize]);
+    [DemoCC, Lag] = CrossCorrelation(ReferenceSignal, TargetSignal, [1, WindowSize]);
     CorrelationMatrix = zeros(length(DemoCC), TotalWindows);
 
     for i = 1:TotalWindows
