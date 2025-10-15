@@ -1,4 +1,4 @@
-function VesselDiameter = ProcessVesselDiameter(VesselDiameter)
+function VesselDiameter = ProcessVesselDiameter(VesselDiameter, FPS)
     % <Documentation>
         % ProcessVesselDiameter()
         %   
@@ -19,13 +19,22 @@ function VesselDiameter = ProcessVesselDiameter(VesselDiameter)
     VesselDiameter_Normalized = cellfun(@Normalization_Mean, FWHM, "UniformOutput", false);
     VesselDiameter_NormalizedFiltered = cellfun(@(Signal) medfilt1(Signal, 20), VesselDiameter_Normalized, "UniformOutput", false);
 
-    WindowSize = 750;
-    for i = 1:size(VesselDiameter.FWHM, 2)
+    WindowSize = round(20*FPS);
+    TotalWindows = length(VesselDiameter.FWHM(:,1)) - WindowSize + 1;
+    TotalROIs = size(VesselDiameter.FWHM, 2);
+    
+    MaxCC = zeros(TotalROIs, TotalWindows);
+    MaxLag = zeros(TotalROIs, TotalWindows);
+    for i = 1:TotalROIs
         ReferenceSignal = VesselDiameter_NormalizedFiltered{1};
         TargetSignal = VesselDiameter_NormalizedFiltered{i};
         [CorrelationMatrix{i}, Lag] = SlidingCrossCorrelation(ReferenceSignal, TargetSignal, WindowSize);
+        for j = 1:TotalWindows
+            [MaxCC(i,j), Index] = max(abs(CorrelationMatrix{i}(:,j)));
+            MaxLag(i,j) = Lag(Index);
+            MaxCC(i,j) = CorrelationMatrix{i}(Index, j);
+        end
     end
-    TotalWindows = length(VesselDiameter.FWHM(:,1)) - WindowSize + 1;
     FrameAxis = (1:TotalWindows) + (WindowSize - 1) / 2;
 
     VesselDiameter.Mean = cell2mat(VesselDiameter_Mean);
@@ -33,6 +42,9 @@ function VesselDiameter = ProcessVesselDiameter(VesselDiameter)
     VesselDiameter.NormalizedFiltered = cell2mat(VesselDiameter_NormalizedFiltered);
     VesselDiameter.XCorr.CorrelationMatrix = CorrelationMatrix;
     VesselDiameter.XCorr.Lag = Lag;  
+    VesselDiameter.XCorr.FrameAxis = FrameAxis;
+    VesselDiameter.XCorr.MaxCCPerWindow = MaxCC;
+    VesselDiameter.XCorr.MaxLagPerWindow = MaxLag;
     VesselDiameter.XCorr.FrameAxis = FrameAxis;
 
 end
