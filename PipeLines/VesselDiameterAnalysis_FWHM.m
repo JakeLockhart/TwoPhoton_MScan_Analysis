@@ -1,4 +1,4 @@
-function [ROIInfo, VesselDiameter] = VesselDiameterAnalysis_FWHM(Stack, FPS, MicronsPerPixel)
+function [ROIInfo, VesselDiameter, TimeAxis] = VesselDiameterAnalysis_FWHM(Stack, FPS, MicronsPerPixel)
     % <Documentation>
         % VesselDiameterAnalysis_FWHM()
         %   
@@ -20,8 +20,7 @@ function [ROIInfo, VesselDiameter] = VesselDiameterAnalysis_FWHM(Stack, FPS, Mic
         MicronsPerPixel (1,1) double {mustBeNonnegative} = 0.570; 
     end
 
-    fprintf('Determining the vessel diameter\n\tFull-Width at Half Maximum Technique\n\tDraw multiple line ROIs along a vessel\n\n');
-
+    fprintf('Determining the vessel diameter\n\tFull-Width at Half Maximum Technique\n\tDraw multiple line ROIs along a vessel\n');
     [ROIs, LineEndPoints, LineWidth] = TileStack_DrawROI({Stack});
     ROIInfo = struct("ROIs", ROIs, ...
                      "LineEndPoints", LineEndPoints, ...
@@ -33,18 +32,21 @@ function [ROIInfo, VesselDiameter] = VesselDiameterAnalysis_FWHM(Stack, FPS, Mic
                             "Edge2", Edge2, ...
                             "ROIProfile", ROIProfile ...
                            );
+    TimeAxis = (0:size(FWHM, 1) - 1) / FPS;
+    fprintf('Vessel diameter across ROIs calculated ✓\n')
 
+    fprintf('Processing vasoactivity...\n')
+    VesselDiameter = ProcessVesselDiameter(VesselDiameter, FPS);
+    
+    fprintf('Plotting vasoactivity\n')
+    Plot_VesselDiameters(TimeAxis, VesselDiameter)
     figure
-    t = tiledlayout("vertical");
-    for i = 1:size(FWHM, 2)
+    Tiles = tiledlayout("vertical");
+    title(Tiles, "Sliding Cross Correlation of Vessel Diameter across ROIs")
+    for i = 1:size(VesselDiameter.FWHM, 2) 
         nexttile(i)
-        TimeAxis = (0:size(FWHM, 1) - 1) / FPS;
-        plot(TimeAxis, FWHM(:,i));
-        ylabel(sprintf('ROI %g', i));
-        axis tight;
+        Plot_SlidingCrossCorrelation(VesselDiameter, VesselDiameter.XCorr.CorrelationMatrix{i}, FPS);
+        plot(VesselDiameter.XCorr.FrameAxis/FPS, VesselDiameter.XCorr.MaxLagPerWindow(i,:)/FPS, 'k-', 'LineWidth', 3);
     end
-    title(t, "FWHM ROI Diameter");
-    xlabel(t, "Time [s]")
-    ylabel(t, "Vessel Diameter [μs]")
-
+    
 end
