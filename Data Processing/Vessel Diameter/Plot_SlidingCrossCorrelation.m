@@ -17,7 +17,6 @@ function Plot_SlidingCrossCorrelation(VesselDiameter, CorrelationMatrix, FPS)
     Lag = VesselDiameter.XCorr.Lag / FPS;
     FrameAxis = VesselDiameter.XCorr.FrameAxis / FPS;
 
-    figure
     imagesc(FrameAxis, Lag, CorrelationMatrix);
     
     title('Sliding Cross Correlation of Vasoactivity')
@@ -29,5 +28,7 @@ function Plot_SlidingCrossCorrelation(VesselDiameter, CorrelationMatrix, FPS)
     cb = colorbar;
     cb.Label.String = 'Correlation Coefficient';
     clim([-1, 1]);
+
+    hold on
     
 end
