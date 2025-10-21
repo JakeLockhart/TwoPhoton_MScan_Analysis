@@ -31,6 +31,8 @@ function [MetaData, AnalogData] = MDF_AnalogChannel(MCS, MetaData)
             MetaData.AnalogChannel.Frequency = MCS.ReadParameter('Analog Acquisition Frequency (Hz)');
             MetaData.AnalogChannel.SampleCount = str2double(MCS.ReadParameter('Analog Sample Count'));
             MetaData.AnalogChannel.Resolution = MCS.ReadParameter('Analog Resolution');
+            Frequency = str2double(regexprep(MetaData.AnalogChannel.Frequency, '[^\d\.\-eE]', ''));
+            MetaData.AnalogChannel.AnalogAxis = (0:MetaData.AnalogChannel.SampleCount - 1) / Frequency;
             
             AC_Channel = string(7); AC_Name = string(7); AC_InputRange = string(7);
             for i = string(0:7)
