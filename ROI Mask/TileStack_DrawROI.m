@@ -1,4 +1,4 @@
-function [ROIs, LineEndPoints, LineWidth] = TileStack_DrawROI(Stack)
+function [ROIs, Line] = TileStack_DrawROI(Stack)
     % <Documentation>
         % TileStack_DrawROI()
         %   Interactive interface for drawing multiple ROI shapes on mean projections of one or more image stacks.
@@ -37,6 +37,7 @@ function [ROIs, LineEndPoints, LineWidth] = TileStack_DrawROI(Stack)
         TotalStacks = numel(Stack);                                                 % Define the total image stacks to analyze
         ROIs = cell(1, TotalStacks);                                                % Preallocate cell arrays for each ROIs within each image stack
         LineEndPoints = cell(1, TotalStacks);                                       % Preallocate cell arrays for each ROI, but used only for line/spline segments
+        LineCenterPoints = cell(1, TotalStacks);                                    % Preallocate cell arrays for each ROI, but used only for line/spline segments
         LineWidth = cell(1, TotalStacks);                                           % Preallocate cell arrays to store the line width of each ROI. 
         ROI_Counter = zeros(1, TotalStacks);                                        % Track the number of ROIs per image stack
 
@@ -96,8 +97,14 @@ function [ROIs, LineEndPoints, LineWidth] = TileStack_DrawROI(Stack)
         for i = 1:length(ROIs)
             ROIs{i} = fliplr(ROIs{i});
             LineEndPoints{i} = fliplr(LineEndPoints{i});
+            LineCenterPoints{i} = fliplr(LineCenterPoints{i});
             LineWidth{i} = fliplr(LineWidth{i});
         end
+        
+        Line = struct('LineEndPoints', {LineEndPoints}, ...
+                      'LineCenterPoints', {LineCenterPoints}, ...
+                      'LineWidth', {LineWidth} ...
+                     );
 
     %% Helper functions
         function SetSelectedAx(src)
@@ -124,12 +131,13 @@ function [ROIs, LineEndPoints, LineWidth] = TileStack_DrawROI(Stack)
             
             if any(strcmp(ROI_ChosenShape, {'Line','Spline'}))
                 LineEndPoints{Index}{CurrentROI} = ROI_Object.Position;
+                LineCenterPoints{Index}{CurrentROI} = mean(ROI_Object.Position);
                 LineWidth{Index}{CurrentROI} = ROI_Object.LineWidth;
             else
                 LineEndPoints{Index}{CurrentROI} = NaN;
+                LineCenterPoints{Index}{CurrentROI} = NaN;
                 LineWidth{Index}{CurrentROI} = NaN;
             end
-
         end
 
 end
