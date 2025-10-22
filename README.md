@@ -10,14 +10,27 @@ MDF file loading, pre/post processing, and data analysis. MDF files created from
     - This folder loads the frames from the MDF file into an int16 numeric array
         - LoadRawStack: Reads the .MDF file frames and creates a 3D numerical array of the image stack.
         - RemovePadding: Removes black borders along the left and right edge of the image stack.
+        - MedianFilter: Apply a 1,2,3 dimension median filter to a dataset using medfilt_().
+        - PixelShiftCorrection: Shift all even or odd rows to align microscopy datasets better.
+        - ButterWorthFilter: Apply a butterworth filter to temporally filter a dataset.
+        - PreProcessingConsole: General UI to display dataset and temporarily apply processing for confirmation.
 - **ImageJ Functions**
     - This folder contains functions that exist in ImageJ(FIJI) which are useful in image processing and analysis for microscopy results. 
         - Deinterleave: Separate a large image stack into multiple substacks based on a user defined number of channels.
         - DeleteFrames: Remove a set of frames from an image stack.
         - MeanProjection: Display a mean projection of a 3D image stack into a 2D image.
+        - PlotZAxisProfile:
+        - Reslice:
+        - ShowPairedStacks:
+        - SubStack:
+        - GrayscaleToRGBStack:
 - **ROI Mask**
     - This folder contains functions to create regions of interest (ROIs) on image stacks. These functions can be used to create 'masks' which can be used to analyze sections of an image for processing.
         - DrawROI: Base function to draw different shaped ROIs
         - DrawMultipleROIs: Draw multiple ROIs on a single image. 'Enter' and 'Double-Click' define an ROI, 'Esc' saves all ROIs
         - TileStack_DrawROI: Tile layout to display multiple image stacks simultaneously. Multiple ROI can be drawn and saved to each image stack. Individual ROI masks can be used on other image stacks.
         - CropStackToMask: Take an image stack and create a smaller 3D array based on the defined ROI mask.
+- **Data Processing**
+    - This folder containes utilities that are used for analyzing signals.
+        - Utilities: General utilities that can be used across analysis pipelines
+        - Vessel Diameter: Plots and functions specifically related to identifying vasoactivity
